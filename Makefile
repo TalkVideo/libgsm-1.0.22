@@ -44,7 +44,7 @@ WAV49	= -DWAV49
 # CCFLAGS 	= -c -O
 
 CC		= gcc -ansi -pedantic
-CCFLAGS 	= -c -O2 -DNeedFunctionPrototypes=1 -Wall -Wno-comment
+CCFLAGS 	= -c -O2 -DNeedFunctionPrototypes=1 -Wall -Wno-comment -fPIC
 
 LD 		= $(CC)
 
@@ -136,10 +136,13 @@ CFLAGS	= $(CCFLAGS) $(SASR) $(DEBUG) $(MULHACK) $(FAST) $(LTP_CUT) \
 LFLAGS	= $(LDFLAGS) $(LDINC)
 ######### It's $(LD) $(LFLAGS)
 
+SHARED_FLAGS = -shared
+
 
 # Targets
 
 LIBGSM	= $(LIB)/libgsm.a
+LIBGSM_SHARED	= $(LIB)/libgsm.so
 
 TOAST	= $(BIN)/toast
 UNTOAST	= $(BIN)/untoast
@@ -279,7 +282,7 @@ TOAST_INSTALL_TARGETS =	\
 
 # Target rules
 
-all:		$(LIBGSM) $(TOAST) $(TCAT) $(UNTOAST)
+all:		$(LIBGSM) $(TOAST) $(TCAT) $(UNTOAST) $(LIBGSM_SHARED)
 		@-echo $(ROOT): Done.
 
 tst:		$(TST)/lin2cod $(TST)/cod2lin $(TOAST) $(TST)/test-result
@@ -304,6 +307,8 @@ $(LIBGSM):	$(LIB) $(GSM_OBJECTS)
 		$(AR) $(ARFLAGS) $(LIBGSM) $(GSM_OBJECTS)
 		$(RANLIB) $(LIBGSM)
 
+$(LIBGSM_SHARED):
+	$(LD) $(SHARED_FLAGS) -o lib/libgsm.so $(GSM_OBJECTS)
 
 # Toast, Untoast and Tcat -- the compress-like frontends to gsm.
 
@@ -425,7 +430,7 @@ semi-clean:
 			-print | xargs rm $(RMFLAGS)
 
 clean:	semi-clean
-		-rm $(RMFLAGS) $(LIBGSM) $(ADDTST)/add		\
+		-rm $(RMFLAGS) $(LIBGSM) $(LIBGSM_SHARED) $(ADDTST)/add		\
 			$(TOAST) $(TCAT) $(UNTOAST)	\
 			$(ROOT)/gsm-1.0.tar.gz
 
